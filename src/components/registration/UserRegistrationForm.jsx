@@ -1,11 +1,15 @@
 import "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
+import {useState} from "react";
 
 export default function RegistrationForm() {
+    const [errorMessage, setErrorMessage] = useState('');
+    const navigate = useNavigate();
+
     const validationSchema = Yup.object({
-        username: Yup.string().required("Username is required"),
+        userName: Yup.string().required("Username is required"),
         age: Yup.number()
             .required("Age is required")
             .positive("Age must be greater than 0")
@@ -23,16 +27,37 @@ export default function RegistrationForm() {
 
     const formik = useFormik({
         initialValues: {
-            username: "",
+            userName: "",
             age: "",
             email: "",
             password: "",
             repeatPassword: "",
         },
         validationSchema,
-        onSubmit: (values) => {
-            console.log("Form values:", values);
-            alert("Registration successful!");
+        onSubmit: async (values) => {
+            try {
+                // Send POST request to the /auth endpoint
+                const response = await fetch('http://localhost:8080/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(values),
+                });
+
+                if (response.ok) {
+                    alert('User registered successfully');
+                    navigate('/login'); // Example: redirect to a dashboard after login
+                } else {
+                    // If authentication fails, throw an error to be caught below
+                    const error = await response.text();
+                    setErrorMessage(error);
+                }
+                // eslint-disable-next-line no-unused-vars
+            } catch (error) {
+                // Handle network or other errors
+                setErrorMessage('Something went wrong, please try again.');
+            }
         },
     });
 
@@ -48,22 +73,22 @@ export default function RegistrationForm() {
 
                 {/* Username */}
                 <div className="mb-4">
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="userName" className="block text-sm font-medium text-gray-700">
                         Username
                     </label>
                     <input
-                        id="username"
-                        name="username"
+                        id="userName"
+                        name="userName"
                         type="text"
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        value={formik.values.username}
-                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                            formik.touched.username && formik.errors.username ? "border-red-500" : "border-gray-300"
+                        value={formik.values.userName}
+                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 text-white border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                            formik.touched.userName && formik.errors.userName ? "border-red-500" : "border-gray-300"
                         }`}
                     />
-                    {formik.touched.username && formik.errors.username ? (
-                        <p className="text-sm text-red-500 mt-1">{formik.errors.username}</p>
+                    {formik.touched.userName && formik.errors.userName ? (
+                        <p className="text-sm text-red-500 mt-1">{formik.errors.userName}</p>
                     ) : null}
                 </div>
 
@@ -79,7 +104,7 @@ export default function RegistrationForm() {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values.age}
-                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border text-white border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                             formik.touched.age && formik.errors.age ? "border-red-500" : "border-gray-300"
                         }`}
                     />
@@ -100,7 +125,7 @@ export default function RegistrationForm() {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values.email}
-                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border text-white border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                             formik.touched.email && formik.errors.email ? "border-red-500" : "border-gray-300"
                         }`}
                     />
@@ -121,7 +146,7 @@ export default function RegistrationForm() {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values.password}
-                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border text-white border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                             formik.touched.password && formik.errors.password ? "border-red-500" : "border-gray-300"
                         }`}
                     />
@@ -145,7 +170,7 @@ export default function RegistrationForm() {
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         value={formik.values.repeatPassword}
-                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                        className={`mt-1 block w-full bg-gray-800 px-3 py-2 border text-white border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
                             formik.touched.repeatPassword && formik.errors.repeatPassword
                                 ? "border-red-500"
                                 : "border-gray-300"
@@ -164,6 +189,13 @@ export default function RegistrationForm() {
                 >
                     Register
                 </button>
+
+                {errorMessage && (
+                    <div className="mt-4 text-center text-red-600">
+                        <p>{errorMessage}</p>
+                    </div>
+                )}
+
                 <div className="mt-2 text-center">
                     <p className="text-white">
                         Already have an account?{' '}

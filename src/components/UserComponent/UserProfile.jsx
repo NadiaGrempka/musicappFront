@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { FaUserCircle } from 'react-icons/fa';
+import { FaUserCircle, FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const UserProfile = () => {
@@ -26,8 +26,27 @@ const UserProfile = () => {
             userName: yup.string().min(2, 'Username must be at least 2 characters'),
             age: yup.number().typeError('Age must be a number').positive('Age must be greater than 0'),
         }),
-        onSubmit: (values) => {
-            console.log(values); // Example: you can send data to the backend here
+        onSubmit: async (values) => {
+            try {
+                const response = await fetch(`http://localhost:8080/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(values),
+                });
+
+                if (response.ok) {
+                    const updatedUser = await response.json();
+                    setUserData(updatedUser);
+                    alert('User information updated successfully!');
+                } else {
+                    alert('Failed to update user information.');
+                }
+                // eslint-disable-next-line no-unused-vars
+            } catch (error) {
+                alert('An error occurred while updating user information.');
+            }
         },
     });
 
@@ -44,7 +63,6 @@ const UserProfile = () => {
                             userName: data.userName,
                             age: data.age,
                         });
-                        console.log("User data:", data);
                         formik.setValues({
                             userName: data.userName || '',
                             age: data.age || '',
@@ -69,6 +87,10 @@ const UserProfile = () => {
         navigate('/login');
     };
 
+    const handleBack = () => {
+        navigate('/home');
+    };
+
     if (loading) {
         return <div className="text-center text-white">Loading...</div>;
     }
@@ -78,7 +100,16 @@ const UserProfile = () => {
     }
 
     return (
-        <div className="p-6 max-w-md mx-auto mt-10 bg-gray-800 shadow-md rounded-md">
+        <div className="flex items-center justify-center min-h-screen bg-gray-800">
+            <div className="w-full max-w-md bg-gray-900 p-8 rounded-lg shadow-md">
+            {/* Back Arrow */}
+            <button
+                onClick={handleBack}
+                className="flex items-center text-white mb-4">
+                <FaArrowLeft className="mr-2" />
+                Back to Home
+            </button>
+
             {/* Header with centered title */}
             <div className="flex justify-center mb-6">
                 <h1 className="text-xl font-semibold text-white">User Profile</h1>
@@ -86,8 +117,8 @@ const UserProfile = () => {
 
             {/* User Info */}
             <div className="text-center">
-                <FaUserCircle className="text-gray-500 mx-auto mb-2" size={100} />
-                <p className="text-gray-400 font-medium mb-4">{userData.email}</p>
+                <FaUserCircle className="text-gray-200 mx-auto mb-2" size={100} />
+                <p className="text-gray-300 font-medium mb-4">{userData.email}</p>
             </div>
 
             {/* Form to Update User Info */}
@@ -98,7 +129,7 @@ const UserProfile = () => {
                     </label>
                     <input
                         id="username"
-                        name="username"
+                        name="userName"
                         type="text"
                         className={`mt-1 block w-full h-10 rounded-md bg-gray-700 text-white border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm pl-3 pr-3 ${
                             formik.touched.userName && formik.errors.userName ? 'border-red-500' : ''
@@ -148,6 +179,7 @@ const UserProfile = () => {
                 >
                     Logout
                 </button>
+            </div>
             </div>
         </div>
     );
