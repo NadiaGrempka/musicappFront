@@ -6,7 +6,8 @@ import SongDetails from "./SongDetails.jsx";
 const SongList = ({ songs = [], onLibraryChange, onPlay }) => {
     const [menuOpen, setMenuOpen] = useState(null);
     const [favorites, setFavorites] = useState({});
-    const [selectedSongId, setSelectedSongId] = useState(null); // Stan do przechowywania wybranego songId
+    const [playlists, setPlaylists] = useState([]); // State to store user's playlists
+    const [selectedSongId, setSelectedSongId] = useState(null);
     const userId = localStorage.getItem("userId");
 
     useEffect(() => {
@@ -31,6 +32,26 @@ const SongList = ({ songs = [], onLibraryChange, onPlay }) => {
         };
 
         fetchFavorites();
+    }, [userId]);
+
+    const fetchPlaylists = async () => {
+        if (userId) {
+            try {
+                const response = await fetch(`http://localhost:8080/search/playlists?userId=${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setPlaylists(data);
+                } else {
+                    console.error("Failed to fetch playlists");
+                }
+            } catch (error) {
+                console.error("Error fetching playlists:", error);
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchPlaylists();
     }, [userId]);
 
     const toggleMenu = (id) => {
@@ -66,15 +87,41 @@ const SongList = ({ songs = [], onLibraryChange, onPlay }) => {
         }
     };
 
+    const addToPlaylist = async (playlistId, songId) => {
+        try {
+            const response = await fetch(
+                `http://localhost:8080/playlists/addsong?playlistId=${playlistId}&songId=${songId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            if (response.ok) {
+                alert("Song successfully added to playlist!");
+                fetchPlaylists(); // Opcjonalne: Odśwież playlisty, aby dane były aktualne.
+                onLibraryChange();  // Wywołanie funkcji odświeżającej aplikację.
+            } else {
+                const errorText = await response.text();
+                console.error("Failed to add song to playlist:", errorText);
+                alert(`Error: ${errorText}`);
+            }
+        } catch (error) {
+            console.error("Error adding song to playlist:", error);
+            alert("An error occurred while adding the song to the playlist.");
+        }
+    };
+
     const handleSongClick = (songId) => {
-        // Jeśli kliknięto ten sam tytuł, to ukryj szczegóły
         setSelectedSongId(selectedSongId === songId ? null : songId);
     };
 
     return (
         <div className="space-y-4">
             {songs.map((song) => (
-                <div key={song.id} className="flex flex-col items-start p-4 bg-gray-800 rounded-lg">
+                <div key={song.id} className="flex flex-col items-start p-4 bg-gray-800/90 rounded-lg">
                     <div className="flex justify-between items-center w-full">
                         <div className="flex items-center gap-4">
                             <div
@@ -86,7 +133,7 @@ const SongList = ({ songs = [], onLibraryChange, onPlay }) => {
                             <div>
                                 <h3
                                     className="text-lg font-bold hover:underline cursor-pointer"
-                                    onClick={() => handleSongClick(song.id)} // Obsługuje kliknięcie na tytule
+                                    onClick={() => handleSongClick(song.id)}
                                 >
                                     {song.title}
                                 </h3>
@@ -111,21 +158,24 @@ const SongList = ({ songs = [], onLibraryChange, onPlay }) => {
                                 </button>
                                 {menuOpen === song.id && (
                                     <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-lg shadow-lg z-10">
-                                        <button
-                                            className="block px-4 py-2 text-sm hover:bg-gray-600 w-full text-left"
-                                            onClick={() => {
-                                                alert(`Added "${song.title}" to playlist!`);
-                                                setMenuOpen(null);
-                                            }}
-                                        >
-                                            Add to playlist
-                                        </button>
+                                        {playlists.map((playlist) => (
+                                            <button
+                                                key={playlist.id}
+                                                className="block px-4 py-2 text-sm hover:bg-gray-600 w-full text-left"
+                                                onClick={() => {
+                                                    addToPlaylist(playlist.id, song.id);
+                                                    setMenuOpen(null);
+                                                }}
+                                            >
+                                                Add to {playlist.title}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-                    {selectedSongId === song.id && <SongDetails songId={song.id} />} {/* Wyświetlenie szczegółów pod piosenką */}
+                    {selectedSongId === song.id && <SongDetails songId={song.id} />}
                 </div>
             ))}
         </div>

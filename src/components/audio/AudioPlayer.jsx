@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { IoPlay, IoPause, IoVolumeHigh, IoEllipsisVertical, IoPlaySkipBack, IoPlaySkipForward } from "react-icons/io5";
+import { IoPlay, IoPause, IoVolumeHigh, IoPlaySkipBack, IoPlaySkipForward, IoDownload } from "react-icons/io5";
 
 // eslint-disable-next-line react/prop-types
-const AudioPlayer = ({ src, onPrevious, onNext }) => {
+const AudioPlayer = ({ src, title, artistName, onPrevious, onNext }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -46,8 +46,16 @@ const AudioPlayer = ({ src, onPrevious, onNext }) => {
         return `${minutes}:${seconds}`;
     };
 
+    const downloadSong = () => {
+        // Create an invisible link to download the song
+        const link = document.createElement("a");
+        link.href = src; // The source URL of the song
+        link.download = title || "song"; // Set a default name for the song file
+        link.click(); // Simulate the click to trigger the download
+    };
+
     return (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 flex items-center justify-between shadow-lg rounded-lg w-[90%] max-w-2xl">
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 p-4 flex items-center justify-between shadow-lg rounded-lg w-[90%] max-w-2xl bg-gray-800/85 backdrop-blur-md">
             {/* Previous Button */}
             <button
                 onClick={onPrevious}
@@ -74,6 +82,8 @@ const AudioPlayer = ({ src, onPrevious, onNext }) => {
 
             {/* Track Information */}
             <div className="flex-1 mx-4">
+                <div className="text-white text-lg font-bold">{title}</div>
+                <div className="text-sm text-gray-400">{artistName}</div>
                 <input
                     type="range"
                     className="w-full h-1 bg-gray-600 rounded-lg accent-pink-500"
@@ -104,8 +114,11 @@ const AudioPlayer = ({ src, onPrevious, onNext }) => {
             </div>
 
             {/* Options Button */}
-            <button className="text-gray-400 hover:text-white">
-                <IoEllipsisVertical size={20} />
+            <button
+                onClick={downloadSong}
+                className="text-gray-400 hover:text-white ml-2"
+            >
+                <IoDownload size={20} />
             </button>
 
             {/* Audio Element */}

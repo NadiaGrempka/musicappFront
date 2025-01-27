@@ -35,21 +35,24 @@ function PlaylistGrid({ playlists: propPlaylists }) {
             {playlistsToRender.map((playlist) => (
                 <div
                     key={playlist.id}
-                    className="bg-gray-800 w-48 h-48 rounded-lg flex flex-col justify-between text-white p-4 relative"
+                    className="bg-gray-800 w-48 h-48 rounded-lg mb-2 flex flex-col justify-between text-white p-4 relative"
                 >
                     {/* Ikona nutki w jasnym tle */}
                     <div className="bg-gray-700 w-20 h-20 flex items-center justify-center rounded-full mx-auto">
-                        <BsMusicNote size={30} className="text-gray-300" />
+                        <BsMusicNote size={30} className="text-gray-300"/>
                     </div>
                     {/* Tytuł playlisty */}
                     <h3 className="text-lg font-semibold text-center hover:underline">{playlist.title}</h3>
+                    <p className="text-sm text-gray-400 hover:underline">
+                        Created by: {playlist.user?.userName || "Unknown"}
+                    </p>
 
                     <div className="relative flex items-center">
                         <button
                             className="ml-auto text-gray-400 hover:text-white"
                             onClick={() => toggleMenu(playlist.id)}
                         >
-                            <IoEllipsisVertical size={24} />
+                            <IoEllipsisVertical size={24}/>
                         </button>
                         {menuOpen === playlist.id && (
                             <div className="absolute right-0 mt-2 w-48 bg-gray-700 rounded-lg shadow-lg z-10">

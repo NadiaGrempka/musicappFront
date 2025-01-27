@@ -36,7 +36,7 @@ const Home = () => {
     const fetchTopSongs = async () => {
         try {
             const response = await axios.get("http://localhost:8080/songs");
-            setSearchResults(response.data.slice(0, 10));
+            setSearchResults(response.data.slice(0, 4));
         } catch (error) {
             console.error("Error fetching songs:", error);
         }
@@ -63,7 +63,7 @@ const Home = () => {
     const fetchTopPlaylists = async () => {
         try {
             const response = await axios.get("http://localhost:8080/playlists");
-            setPlaylistResults(response.data.slice(0, 10));
+            setPlaylistResults(response.data.slice(0, 4));
         } catch (error) {
             console.error("Error fetching playlists:", error);
         }
@@ -92,7 +92,7 @@ const Home = () => {
     };
 
     return (
-        <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white min-h-screen flex">
+        <div className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 text-white min-h-screen flex">
             <ToastContainer />
             <Sidebar refresh={refresh} onPlay={handlePlaySong} />
             <div className="flex-1 p-6">
@@ -112,7 +112,7 @@ const Home = () => {
                     <h2 className="text-xl font-bold mt-8 mb-4">Playlists</h2>
                     <PlaylistGrid playlists={playlistResults} onChange={handleNewPlaylistCreated}/>
                 </div>
-                {audioSrc && <AudioPlayer src={audioSrc} />}
+                {audioSrc && <AudioPlayer src={audioSrc}/>}
                 {/* Button to navigate to profile */}
                 <button
                     onClick={() => navigate("/profile")}
